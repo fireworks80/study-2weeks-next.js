@@ -1,65 +1,69 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from 'next/head';
+import { useEffect } from 'react';
+import axios from 'axios';
+import Error from 'next/error';
+import Link from 'next/link';
 
-export default function Home() {
+function Home({ data, error }) {
+  // useEffect(() => {
+  // let url = 'https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json';
+  // axios
+  //   .get(url + '?key=bca7ecfb6973dec2acd4de31da407b58&targetDt=20200104')
+  //   .then((res) => {
+  //     console.log(res);
+  //   })
+  //   .catch((err) => console.log(err));
+  // }, []);
+  // console.log(data);
+  // console.log(data.boxOfficeResult.dailyBoxOfficeList);
+
+  if (error) {
+    return <Error />;
+  }
+
+  if (data.faultInfo) {
+    return <p>{data.faultInfo.message}</p>;
+  }
+
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Box Office</title>
+        <link rel='icon' href='/favicon.ico' />
       </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+      <h1>박스오피스</h1>
+      <h2>{data.boxOfficeResult.boxofficeType}</h2>
+      <p>
+        <time>{data.boxOfficeResult.showRange}</time>
+      </p>
+      <ol>
+        {data.boxOfficeResult.dailyBoxOfficeList.map((item) => (
+          <li key={item.movieCd}>
+            <Link href='/movies/[code]' as={`/movies/${item.movieCd}`}>
+              <a>
+                [{item.rank}]{item.movieNm} <time>({item.openDt})</time>
+              </a>
+            </Link>
+          </li>
+        ))}
+      </ol>
     </div>
-  )
+  );
 }
+
+Home.getInitialProps = async function () {
+  console.log(process.env.KEY);
+  let url = 'https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json';
+  try {
+    const response = await axios.get(url + `?key=${process.env.KEY}&targetDt=20200104`);
+    // console.log(response);
+    return {
+      data: response.data,
+    };
+  } catch (error) {
+    console.warn(error);
+    return { error };
+  }
+};
+
+export default Home;

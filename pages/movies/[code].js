@@ -57,7 +57,7 @@ MovieInfo.getInitialProps = async function (ctx) {
   let key = process.env.KEY || 'bca7ecfb6973dec2acd4de31da407b58';
   try {
     const result = await axios.get(
-      `http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=${key}&movieCd=${ctx.query.code}`
+      `https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=${key}&movieCd=${ctx.query.code}`
     );
 
     return {

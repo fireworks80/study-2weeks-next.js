@@ -9,7 +9,7 @@ function MovieInfo({ movieInfo, error }) {
   };
 
   if (error) {
-    return <Error statusCode={500} title={props.error.message} />;
+    return <Error statusCode={500} title={error.message} />;
   }
 
   return (

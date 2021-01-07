@@ -54,10 +54,10 @@ function MovieInfo({ movieInfo, error }) {
   );
 }
 MovieInfo.getInitialProps = async function (ctx) {
-  // console.log(ctx.query.code);
+  let key = process.env.KEY || 'bca7ecfb6973dec2acd4de31da407b58';
   try {
     const result = await axios.get(
-      `http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=${process.env.KEY}&movieCd=${ctx.query.code}`
+      `http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json?key=${key}&movieCd=${ctx.query.code}`
     );
 
     return {

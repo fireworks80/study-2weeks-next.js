@@ -1,22 +1,13 @@
 import Head from 'next/head';
-import { useEffect } from 'react';
 import axios from 'axios';
 import Error from 'next/error';
 import Link from 'next/link';
+import { DatePicker } from 'antd';
+import { useRouter } from 'next/router';
+import moment from 'moment';
 
-function Home({ data, error }) {
-  // useEffect(() => {
-  // let url = 'https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json';
-  // axios
-  //   .get(url + '?key=bca7ecfb6973dec2acd4de31da407b58&targetDt=20200104')
-  //   .then((res) => {
-  //     console.log(res);
-  //   })
-  //   .catch((err) => console.log(err));
-  // }, []);
-  // console.log(data);
-  // console.log(data.boxOfficeResult.dailyBoxOfficeList);
-
+function Home({ data, error, targetDt }) {
+  const router = useRouter();
   if (error) {
     return <Error />;
   }
@@ -25,6 +16,10 @@ function Home({ data, error }) {
     return <p>{data.faultInfo.message}</p>;
   }
 
+  function onChange(date, dateString) {
+    // console.log(date, dateString);
+    router.push(`/?targetDt=${dateString}`);
+  }
   return (
     <div>
       <Head>
@@ -36,6 +31,7 @@ function Home({ data, error }) {
       <p>
         <time>{data.boxOfficeResult.showRange}</time>
       </p>
+      <DatePicker onChange={onChange} defaultValue={moment(targetDt, 'YYYYMMDD')} format={'YYYYMMDD'} />
       <ol>
         {data.boxOfficeResult.dailyBoxOfficeList.map((item) => (
           <li key={item.movieCd}>
@@ -51,13 +47,16 @@ function Home({ data, error }) {
   );
 }
 
-Home.getInitialProps = async function () {
-  console.log(process.env.KEY);
+Home.getInitialProps = async function (ctx) {
+  // console.log(process.env.KEY);
+  let key = process.env.KEY || 'bca7ecfb6973dec2acd4de31da407b58';
   let url = 'https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json';
+  const targetDt = ctx.query.targetDt || moment().subtract(1, 'day').format('YYYYMMDD');
   try {
-    const response = await axios.get(url + `?key=${process.env.KEY}&targetDt=20200104`);
-    // console.log(response);
+    const response = await axios.get(url + `?key=${key}&targetDt=${targetDt}`);
+    // console.log(targetDt);
     return {
+      targetDt,
       data: response.data,
     };
   } catch (error) {
